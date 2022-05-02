@@ -2,9 +2,11 @@ import math
 import pandas as pd
 import pydot
 from node import Node
+from subprocess import check_call
 pd.options.mode.chained_assignment = None  # default='warn'
-from IPython.display import Image, display
-
+from warnings import simplefilter
+simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
+from graphviz import render
 
 class DecisionTree:
     def __init__(self, file_name, sheet_name):
@@ -18,7 +20,7 @@ class DecisionTree:
     def start(self):
         attributes = list(self.get_columns_from_data_frame(self.data_frame, 'atrybut'))
         conditions = list(self.get_columns_from_data_frame(self.data_frame, 'przesłanka'))
-        conclusion_name = 'reklama'
+        conclusion_name = 'czas wolny po pracy'
 
         while conclusion_name in conditions:
             conditions.remove(conclusion_name)
@@ -30,9 +32,6 @@ class DecisionTree:
             rows_conclusion = self.get_rows_from_data_frame(current_data_frame, ['przesłanka'], [conclusion_name])
             max_info = [0, '', '']
 
-            print(conditions)
-            print(attributes)
-
             for (condition, attribute) in zip(conditions, attributes):
                 row_attribute = self.get_rows_from_data_frame(current_data_frame, ['przesłanka', 'atrybut'], [condition, attribute])
                 e = self.entropy_for_attribute(row_attribute, rows_conclusion)
@@ -40,14 +39,15 @@ class DecisionTree:
                     max_info[0] = i - e
                     max_info[1] = condition
                     max_info[2] = attribute
+                print(i-e)
             print(max_info)
-            print("***************************")
+            print("**********")
             if max_info[0] != 0:
                 self.splitting_data_frame_by_condition_and_attribute(current_data_frame, current_node, max_info[1], max_info[2])
             else:
                 current_node.name = self.get_conclusion(rows_conclusion)
 
-        self.draw_tree_rec(self.root_node, 0)
+        self.draw_tree()
 
     def get_conclusion(self, rows_conclusion):
         for (index, x) in enumerate([sum(list(i)[2:]) for i in list(rows_conclusion.values)]):
@@ -86,8 +86,6 @@ class DecisionTree:
             attribute_row = self.get_rows_from_data_frame(condition_rows, ['atrybut'], [attribute_name])
             same_data_counter = sum(list(attribute_row.values[0][2:]))
             length_of_data_frame = len(attribute_row.columns) - 2
-            print(same_data_counter)
-            print(length_of_data_frame)
             entropy_sum += self.entropy_log(same_data_counter, length_of_data_frame)
 
         return entropy_sum
@@ -133,33 +131,29 @@ class DecisionTree:
     def get_columns_from_data_frame(self, data_frame, columns_name):
         return data_frame[columns_name]
 
-    def draw_tree_rec(self, node: Node, level):
+    def draw_tree_rec(self, node: Node, level, tree, parent_node, left_right_child):
         if node.left_child is not None:
-            self.draw_tree_rec(node.left_child, level + 1)
+            self.draw_tree_rec(node.left_child, level + 1, tree, node, 0)
 
         if node.right_child is not None:
-            self.draw_tree_rec(node.right_child, level + 1)
+            self.draw_tree_rec(node.right_child, level + 1, tree, node, 1)
 
-        print(node.name + " " + str(level))
+        print("parent_node: " + parent_node.name + " | node: " + node.name + " level:" + str(level) + " left_right_child:" + str(left_right_child))
+        x = pydot.Node(node.name, style="filled", fillcolor="green")
+        tree.add_node(x)
 
-    def drawTree(self):
+        edge = pydot.Edge(parent_node.name, node.name)
+        tree.add_edge(edge)
+
+    def draw_tree(self):
 
         tree = pydot.Dot(graph_type='graph', strict=True)
 
-        x = pydot.Node("A", style="filled", fillcolor="green")
-        tree.add_node(x)
-        x = pydot.Node("B", style="filled", fillcolor="green")
-        tree.add_node(x)
-        x = pydot.Node("C", style="filled", fillcolor="green")
-        tree.add_node(x)
-
-        edge = pydot.Edge("A", "B")
-        tree.add_edge(edge)
-        edge = pydot.Edge("A", "C")
-        tree.add_edge(edge)
+        r = Node()
+        r.name = "pierwszy"
+        self.draw_tree_rec(self.root_node, 0, tree, r, -1)
         tree.write("tree.dot")
 
-        (something,) = pydot.graph_from_dot_file('something.dot')
-        something.write_png('somefile.png')
-        
+        # check_call(['dot', '-Tpng', 'tree.dot', '-o', 'OutputFile.png'])
+        render('dot', 'png', 'tree.dot')
 

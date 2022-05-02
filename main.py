@@ -7,7 +7,7 @@ if __name__ == '__main__':
     # file_name = "data.xlsx"
     # sheet_name = "sheet"
 
-    file_name = "data_test.xlsx"
+    file_name = "data.xlsx"
     sheet_name = "sheet"
 
     # dataCreator = DataCreator(file_name, sheet_name)
@@ -19,6 +19,3 @@ if __name__ == '__main__':
 
     decisionTree = DecisionTree(file_name, sheet_name)
     decisionTree.start()
-    # decisionTree.drawTree()
-
-
