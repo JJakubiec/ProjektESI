@@ -30,6 +30,9 @@ class DecisionTree:
             rows_conclusion = self.get_rows_from_data_frame(current_data_frame, ['przesłanka'], [conclusion_name])
             max_info = [0, '', '']
 
+            print(conditions)
+            print(attributes)
+
             for (condition, attribute) in zip(conditions, attributes):
                 row_attribute = self.get_rows_from_data_frame(current_data_frame, ['przesłanka', 'atrybut'], [condition, attribute])
                 e = self.entropy_for_attribute(row_attribute, rows_conclusion)
@@ -37,7 +40,8 @@ class DecisionTree:
                     max_info[0] = i - e
                     max_info[1] = condition
                     max_info[2] = attribute
-
+            print(max_info)
+            print("***************************")
             if max_info[0] != 0:
                 self.splitting_data_frame_by_condition_and_attribute(current_data_frame, current_node, max_info[1], max_info[2])
             else:
@@ -51,12 +55,11 @@ class DecisionTree:
                 return list(rows_conclusion.values)[index][1]
 
     def entropy_for_attribute(self, row_attribute, rows_conclusion):
-        negative_attribute = [(i+1) % 2 for i in list(row_attribute.values[0][2:])]
-        positive_attribute = list(row_attribute.values[0][2:])
+        attribute_list = list(row_attribute.values[0][2:])
         conclusions = [list(i)[2:] for i in list(rows_conclusion.values)]
-        sum_negative = sum(negative_attribute)
-        sum_positive = sum(positive_attribute)
-        sum_all = sum_positive + sum_negative
+        sum_negative = 0
+        sum_positive = 0
+        sum_all = len(attribute_list)
         sum_conclusions_positive = []
         sum_conclusions_negative = []
         sum_entropy = 0
@@ -64,9 +67,11 @@ class DecisionTree:
             sum_conclusions_positive.append(0)
             sum_conclusions_negative.append(0)
             for (index, value) in enumerate(conclusion):
-                if value == 1 and negative_attribute[index] == 1:
+                if value == 1 and attribute_list[index] + 1 == 1:
+                    sum_negative += 1
                     sum_conclusions_negative[h] += 1
-                if value == 1 and positive_attribute[index] == 1:
+                if value == 1 and attribute_list[index] == 1:
+                    sum_positive += 1
                     sum_conclusions_positive[h] += 1
         for (positive, negative) in zip(sum_conclusions_positive, sum_conclusions_negative):
             sum_entropy += (sum_positive/sum_all)*self.entropy_log(positive, sum_positive) + (sum_negative/sum_all)*self.entropy_log(negative, sum_negative)
@@ -81,6 +86,8 @@ class DecisionTree:
             attribute_row = self.get_rows_from_data_frame(condition_rows, ['atrybut'], [attribute_name])
             same_data_counter = sum(list(attribute_row.values[0][2:]))
             length_of_data_frame = len(attribute_row.columns) - 2
+            print(same_data_counter)
+            print(length_of_data_frame)
             entropy_sum += self.entropy_log(same_data_counter, length_of_data_frame)
 
         return entropy_sum
