@@ -13,3 +13,4 @@ class Node:
 
     def set_right_child(self, right_child):
         self.right_child = right_child
+

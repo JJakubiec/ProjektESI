@@ -14,22 +14,22 @@ class DataCreator:
                               [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
                               [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]]
 
-        self.conditions_attributes = (['zmęczenie', 'mocne'],
-                                    ['zmęczenie', 'średnie'],
-                                    ['zmęczenie', 'słabe'],
-                                    ['zadanie w pracy', 'bardzo ważne'],
-                                    ['zadanie w pracy', 'średnio ważne'],
-                                    ['zadanie w pracy', 'mało ważne'],
-                                    ['odpoczynek dnia następnego', 'możliwy'],
-                                    ['odpoczynek dnia następnego', 'niemożliwy'],
-                                    ['godzina zakończenia pracy', '14-15'],
-                                    ['godzina zakończenia pracy', '15-16'],
-                                    ['godzina zakończenia pracy', '16-17'],
+        self.conditions_attributes = (['zmeczenie', 'mocne'],
+                                    ['zmeczenie', 'srednie'],
+                                    ['zmeczenie', 'slabe'],
+                                    ['zadanie w pracy', 'bardzo wazne'],
+                                    ['zadanie w pracy', 'srednio wazne'],
+                                    ['zadanie w pracy', 'malo wazne'],
+                                    ['odpoczynek dnia nastepnego', 'mozliwy'],
+                                    ['odpoczynek dnia nastepnego', 'niemozliwy'],
+                                    ['godzina zakonczenia pracy', '14-15'],
+                                    ['godzina zakonczenia pracy', '15-16'],
+                                    ['godzina zakonczenia pracy', '16-17'],
                                     ['pogoda', 'deszczowo'],
-                                    ['pogoda', 'mroźnie'],
-                                    ['pogoda', 'słonecznie'],
+                                    ['pogoda', 'mroznie'],
+                                    ['pogoda', 'slonecznie'],
                                     ['pogoda', 'pochmurnie'],
-                                    ['czas wolny po pracy', 'powrót do pracy'],
+                                    ['czas wolny po pracy', 'powrot do pracy'],
                                     ['czas wolny po pracy', 'sen'],
                                     ['czas wolny po pracy', 'spacer'])
 
@@ -37,13 +37,16 @@ class DataCreator:
         row = 1
         col = 2
 
+        self.worksheet.write(0, 0, "przesłanka")
+        self.worksheet.write(0, 1, "atrybut")
+
         for condition, attribute in self.conditions_attributes:
             self.worksheet.write(row, 0, condition)
             self.worksheet.write(row, 1, attribute)
             row = row + 1
 
         for temp_possibilities in self.all_possibilities:
-            self.worksheet.write(0, col, 'kombinacja_' + str(col-1))
+            self.worksheet.write(0, col, col-1)
 
             row = 1
             for outer in temp_possibilities:

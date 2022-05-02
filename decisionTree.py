@@ -2,11 +2,11 @@ import math
 import pandas as pd
 import pydot
 from node import Node
-from subprocess import check_call
-pd.options.mode.chained_assignment = None  # default='warn'
 from warnings import simplefilter
-simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 from graphviz import render
+pd.options.mode.chained_assignment = None  # default='warn'
+simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
+
 
 class DecisionTree:
     def __init__(self, file_name, sheet_name):
@@ -39,9 +39,6 @@ class DecisionTree:
                     max_info[0] = i - e
                     max_info[1] = condition
                     max_info[2] = attribute
-                print(i-e)
-            print(max_info)
-            print("**********")
             if max_info[0] != 0:
                 self.splitting_data_frame_by_condition_and_attribute(current_data_frame, current_node, max_info[1], max_info[2])
             else:
@@ -123,6 +120,7 @@ class DecisionTree:
             self.stack_node.append(right_node)
             self.stack_splitting.append(right_data_frame)
 
+
     def get_rows_from_data_frame(self, data_frame, column_names: [], conditions: []):
         for (column_name, condition) in zip(column_names, conditions):
             data_frame = data_frame.loc[data_frame[column_name] == condition]
@@ -131,29 +129,36 @@ class DecisionTree:
     def get_columns_from_data_frame(self, data_frame, columns_name):
         return data_frame[columns_name]
 
-    def draw_tree_rec(self, node: Node, level, tree, parent_node, left_right_child):
+    def draw_tree_rec(self, node: Node, uid, tree, parent_node, left_right_child):
+
+        uid_piece = str(left_right_child)
+        if uid_piece == 'tak':
+            uid_piece = str(1)
+        else:
+            uid_piece = str(0)
+
         if node.left_child is not None:
-            self.draw_tree_rec(node.left_child, level + 1, tree, node, 0)
+            e = pydot.Edge(str(uid) + "\n" + parent_node.name, str(uid) + uid_piece + "\n" + node.name, label=left_right_child)
+            tree.add_edge(e)
+            self.draw_tree_rec(node.left_child, str(uid) + uid_piece, tree, node, 'nie')
 
         if node.right_child is not None:
-            self.draw_tree_rec(node.right_child, level + 1, tree, node, 1)
+            e = pydot.Edge(str(uid) + "\n" + parent_node.name, str(uid) + uid_piece + "\n" + node.name, label=left_right_child)
+            tree.add_edge(e)
+            self.draw_tree_rec(node.right_child, str(uid) + uid_piece, tree, node, 'tak')
 
-        print("parent_node: " + parent_node.name + " | node: " + node.name + " level:" + str(level) + " left_right_child:" + str(left_right_child))
-        x = pydot.Node(node.name, style="filled", fillcolor="green")
-        tree.add_node(x)
-
-        edge = pydot.Edge(parent_node.name, node.name)
-        tree.add_edge(edge)
+        if node.right_child is None and node.left_child is None:
+            e = pydot.Edge(str(uid) + "\n" + parent_node.name, str(uid) + uid_piece + "\n" + node.name, label=left_right_child)
+            tree.add_edge(e)
 
     def draw_tree(self):
 
-        tree = pydot.Dot(graph_type='graph', strict=True)
+        tree = pydot.Dot(graph_type='digraph', strict=True)
 
         r = Node()
-        r.name = "pierwszy"
-        self.draw_tree_rec(self.root_node, 0, tree, r, -1)
-        tree.write("tree.dot")
+        r.name = "head"
+        self.draw_tree_rec(self.root_node, 0, tree, r, 'nie')
 
-        # check_call(['dot', '-Tpng', 'tree.dot', '-o', 'OutputFile.png'])
+        tree.write("tree.dot")
         render('dot', 'png', 'tree.dot')
 
