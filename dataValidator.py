@@ -4,7 +4,6 @@ import pandas as pd
 class DataValidator:
     def __init__(self, file_name, sheet_name):
         self.df = pd.read_excel(file_name, sheet_name).loc[0:19, :]
-        print(self.df)
         self.file_name = file_name
         self.sheet_name = sheet_name
 
